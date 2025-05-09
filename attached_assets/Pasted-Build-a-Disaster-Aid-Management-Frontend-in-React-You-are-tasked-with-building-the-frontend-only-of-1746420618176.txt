@@ -1,0 +1,112 @@
+Build a Disaster Aid Management Frontend in React
+
+You are tasked with building the frontend only of a Disaster Aid Management System using React. This project is focused on crisis response and donation. Backend integration will come later, so use mocked data or placeholders where necessary. Here are the detailed frontend requirements:
+
+1. Blog Listing & Detail Pages
+Create a home page with blog-style cards showing disaster-related posts.
+
+Each card includes:
+
+Disaster title
+
+Brief description
+
+Image
+
+“Read More” button
+
+On clicking a card:
+
+Navigate to a blog detail page.
+
+Show:
+
+Full blog content
+
+Name of the rescue team working there (mocked)
+
+A donation progress bar with a target budget
+
+A "Donate" button (inactive or disabled until login is implemented)
+
+If the donation progress reaches 100%, mark the donation button as disabled
+
+Use useState to simulate donation progress filling up on button click
+
+2. Navbar Component
+Include a fixed top navbar with the following links:
+
+Home (links to blog listing)
+
+Disaster Map (links to a map view)
+
+About Us
+
+Highlight active links using react-router-dom and styles.
+
+3. Disaster Map Page
+Display a map of Pakistan using a React map library (e.g. react-leaflet or google-map-react)
+
+Render markers for different disaster sites (use static/mock data)
+
+Markers should be clickable to show basic info in a tooltip or modal
+
+4. Admin Panel UI (Frontend Only)
+Mock the admin panel with the following sections:
+
+Disaster Marker Management:
+
+A form to "add marker" with location name, coordinates, and disaster description
+
+Display list of current markers
+
+Blog Uploader:
+
+A form to create a new blog post (title, image, content)
+
+Rescue Team Management:
+
+Show list of rescue teams with status (mocked)
+
+Simulate approving rescue teams by toggling a status button
+
+5. Rescue Team Dashboard (Frontend Only)
+Provide a basic dashboard layout for rescue teams with:
+
+Community Tab:
+
+Simulate a group chat UI (no real messaging needed)
+
+Admin's messages can appear differently (e.g., different color)
+
+Allocation Tab:
+
+Show list of disasters and allow a team to “accept” an assignment
+
+Once accepted, update the disaster blog to include the team name (simulate this locally with state)
+
+Status Toggle:
+
+A button to switch availability between “Available” and “Not Available”
+
+Only visible to admin view (mock with state switch)
+
+6. Authentication Placeholder
+Include Login and Signup UI only for:
+
+Users (to enable donations)
+
+Rescue Teams (to access their dashboard)
+
+Admin (to access admin panel)
+
+No actual login logic, just the form UI and mock login state with a boolean in context or state
+
+7. General Notes
+Style using TailwindCSS or a UI library like Material UI or ShadCN
+
+For the blog design, take inspiration from ReliefWeb
+
+Use Pakistan-specific locations for all disaster data and mapping
+
+Modularize components properly (e.g., Navbar, BlogCard, Map, RescueTeamPanel, etc.)

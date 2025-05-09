@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 220 17% 20%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 220 17% 20%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 17% 20%;
+    
+    --primary: 5 78% 57%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 204 79% 53%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 40%;
+    
+    --accent: 35 91% 52%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 5 78% 57%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 5 78% 57%;
+    
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 220 17% 13%;
+    --foreground: 210 20% 98%;
+    
+    --card: 220 17% 20%;
+    --card-foreground: 210 20% 98%;
+    
+    --popover: 220 17% 20%;
+    --popover-foreground: 210 20% 98%;
+    
+    --primary: 5 78% 57%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 204 79% 53%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 220 17% 25%;
+    --muted-foreground: 210 20% 80%;
+    
+    --accent: 35 91% 52%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 5 78% 57%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 220 17% 30%;
+    --input: 220 17% 30%;
+    --ring: 5 78% 57%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Custom color variables for the project */
+  :root {
+    --color-danger: hsl(5, 78%, 57%);
+    --color-success: hsl(145, 63%, 49%);
+    --color-neutral-light: hsl(204, 15%, 94%);
+    --color-neutral-dark: hsl(210, 29%, 29%);
+  }
+}
+
+@layer components {
+  .active-link {
+    @apply border-b-3 border-primary;
+  }
+
+  .nav-link {
+    @apply font-medium text-neutral-dark hover:text-primary transition-colors;
+  }
+
+  .prose {
+    @apply max-w-none leading-normal;
+  }
+
+  .prose h2 {
+    @apply text-xl font-bold font-heading text-neutral-dark my-4;
+  }
+
+  .prose p {
+    @apply text-gray-700 mb-4;
+  }
+
+  .prose ul {
+    @apply list-disc pl-6 mb-4;
+  }
+
+  .prose li {
+    @apply mb-2;
+  }
+}
+
+/* Fonts */
+.font-heading {
+  font-family: 'Roboto', sans-serif;
+}
+
+.font-body {
+  font-family: 'Open Sans', sans-serif;
+}
+
+.font-ui {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom classes for specific elements */
+.bg-danger {
+  background-color: var(--color-danger);
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
+
+.bg-success {
+  background-color: var(--color-success);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.bg-neutral-light {
+  background-color: var(--color-neutral-light);
+}
+
+.text-neutral-dark {
+  color: var(--color-neutral-dark);
+}
+
+.border-b-3 {
+  border-bottom-width: 3px;
+}
