@@ -13,39 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Swal from 'sweetalert2';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-interface BlogData {
-  image: string;
-  severity: string;
-  title: string;
-  date: string;
-  keywords: string;
-  content: string;
-  donationTarget: string;
-  location: string;
-  id?: string;  // Make id optional but don't include it in string index signature
-  [key: string]: string | undefined;  // Update index signature to allow undefined
-}
-
-interface UserBlog {
-  _id: string;
-  title: string;
-  content: string;
-  severity: string;
-  location: string;
-  authorName: string;
-  createdAt: string;
-  image: string;
-  keywords?: string;
-  donationTarget?: number;
-}
-
+import { EditBlogDialog } from '@/components/EditBlogDialog';
+import { BlogData, UserBlog } from '@/types/blog';
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -153,32 +122,25 @@ const AdminPanel = () => {
     try {
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       const formData = new FormData();
-      const imageFile = (document.getElementById('image') as HTMLInputElement)?.files?.[0];
 
-      // Only require image for new blogs
-      if (!imageFile && !editingBlog) {
+      // Append the image file if it exists (for both new and edited blogs)
+      if (blogData.imageFile) {
+        formData.append('image', blogData.imageFile);
+      } else if (!editingBlog) {
+        // Only require image for new blogs
         throw new Error('Please select an image');
       }
 
-      // Only append image if a new one is selected
-      if (imageFile) {
-        formData.append('image', imageFile);
-      }
-
-      // Append blog data
+      // Append all other fields except imageFile
       Object.keys(blogData).forEach((key) => {
-        if (key !== 'image' || imageFile) {
-          const value = blogData[key];
-          if (value !== undefined) {
-            formData.append(key, value);
-          }
+        if (key !== 'imageFile' && blogData[key] !== undefined) {
+          formData.append(key, blogData[key] as string);
         }
       });
 
       // Add author name
       formData.append('authorName', userData.name);
 
-      // Determine if we're editing or creating
       const url = editingBlog
         ? `http://localhost:8080/api/blogs/${editingBlog._id}`
         : 'http://localhost:8080/api/blogs';
@@ -188,6 +150,7 @@ const AdminPanel = () => {
       const response = await fetch(url, {
         method,
         body: formData,
+        // Don't set Content-Type header - let browser set it with boundary
       });
 
       if (!response.ok) {
@@ -261,150 +224,6 @@ const AdminPanel = () => {
       if (element) element.value = '';
     });
   };
-
-  // Add EditDialog component inside AdminPanel
-  const EditDialog = () => (
-    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto my-4">
-        <DialogHeader className="sticky top-0 bg-white pb-4 z-10">
-          <DialogTitle>Edit Blog Post</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4"> {/* Reduced space-y-6 to space-y-4 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Grid layout for compact form */}
-            <div>
-              <Label htmlFor="title">📝 Title</Label>
-              <Input
-                id="title"
-                value={blogData.title}
-                placeholder="Enter blog title"
-                onChange={(e) => setBlogData({ ...blogData, title: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="date">📅 Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={blogData.date}
-                onChange={(e) => setBlogData({ ...blogData, date: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="severity">⚠️ Severity Level</Label>
-              <Select
-                value={blogData.severity}
-                onValueChange={(value) => setBlogData({ ...blogData, severity: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select severity" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="urgent">🚨 Urgent</SelectItem>
-                  <SelectItem value="ongoing">🌀 Ongoing</SelectItem>
-                  <SelectItem value="basic">ℹ️ Basic</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="location">📍 Location</Label>
-              <Select
-                value={blogData.location}
-                onValueChange={(value) => setBlogData({ ...blogData, location: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select city" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    "karachi", "lahore", "islamabad", "rawalpindi", "peshawar",
-                    "quetta", "multan", "faisalabad", "hyderabad", "sialkot",
-                    "gujranwala", "bahawalpur", "sargodha", "sukkur", "larkana",
-                    "sheikhupura", "bhimber", "mirpur", "muzaffarabad", "gilgit",
-                    "skardu", "hunza", "khuzdar", "turbat", "gwadar", "abbottabad",
-                    "mansehra", "swat", "mardan", "jacobabad", "kashmore",
-                    "thatta", "rahim-yar-khan", "sahiwal", "okara"
-                  ].map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city.charAt(0).toUpperCase() + city.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="image">🖼️ Disaster Image</Label>
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              className="file:mr-4 file:px-4 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-sm hover:file:bg-indigo-100 transition-all duration-200"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setBlogData({ ...blogData, image: file.name });
-                }
-              }}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="keywords">🔍 Keywords</Label>
-              <Input
-                id="keywords"
-                value={blogData.keywords}
-                placeholder="e.g., balochistan, earthquake"
-                onChange={(e) => setBlogData({ ...blogData, keywords: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="donationTarget">🎯 Donation Target (PKR)</Label>
-              <Input
-                id="donationTarget"
-                type="number"
-                value={blogData.donationTarget}
-                placeholder="Enter target amount"
-                onChange={(e) => setBlogData({ ...blogData, donationTarget: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="content">✏️ Blog Content</Label>
-            <Textarea
-              id="content"
-              value={blogData.content}
-              placeholder="Write your blog content here..."
-              className="h-24"
-              onChange={(e) => setBlogData({ ...blogData, content: e.target.value })}
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4 sticky bottom-0 bg-white">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-            >
-              Save Changes
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -606,7 +425,13 @@ const AdminPanel = () => {
           </CardContent>
         </Card>
 
-        <EditDialog />
+        <EditBlogDialog
+          isOpen={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          blogData={blogData}
+          onBlogDataChange={setBlogData}  // This is now correctly typed
+          onSubmit={handleSubmit}
+        />
 
       </div>
     </div>
