@@ -1,13 +1,60 @@
 import { useParams, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { calculateProgress, formatCurrency } from "@/lib/utils";
+import Swal from "sweetalert2";
+import PayPalButton from "@/components/PayPalButton";
+import { PayPalButtons } from "@paypal/react-paypal-js";
+
 
 const BlogDetail = () => {
   const { id } = useParams();
+  const queryClient = useQueryClient();
+
+  // Add donation mutation
+  const { mutate: updateDonation } = useMutation({
+    mutationFn: async (amount: number) => {
+      const response = await fetch(`http://localhost:8080/api/blogs/${id}/donate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update donation');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['blog', id]
+      });
+    },
+  });
+
+  const handleDonationSuccess = (details: any) => {
+    const amount = details.purchase_units[0].amount.value;
+    updateDonation(Number(amount));
+    Swal.fire({
+      icon: 'success',
+      title: 'Thank you for your donation!',
+      text: `You have donated $${amount} to help with this disaster.`,
+    });
+  };
+
+  const handleDonationError = (error: any) => {
+    console.error('Payment failed:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Payment Failed',
+      text: 'There was an error processing your donation. Please try again.',
+    });
+  };
+
 
   const { data: blog, isLoading, error } = useQuery({
     queryKey: ['blog', id],
@@ -86,7 +133,7 @@ const BlogDetail = () => {
               <div className="mt-8 mb-6 p-4 bg-gray-50 rounded-lg">
                 <h2 className="text-xl font-bold mb-4">Donation Progress</h2>
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>Current Progress</span>
+                  <h6>Current Progress</h6>
                   <span>
                     {calculateProgress(blog.donationCurrent, blog.donationTarget)}% of{' '}
                     {formatCurrency(blog.donationTarget)}
@@ -97,9 +144,13 @@ const BlogDetail = () => {
                   className="mb-4"
                 />
                 <div className="text-center mt-4">
-                  <Button variant="destructive">
-                    Donate Now
-                  </Button>
+                  <div className="max-w-md mx-auto">
+                    <PayPalButton
+                      amount="10.00" // You can make this dynamic
+                      onSuccess={handleDonationSuccess}
+                      onError={handleDonationError}
+                    />
+                  </div>
                 </div>
               </div>
             )}

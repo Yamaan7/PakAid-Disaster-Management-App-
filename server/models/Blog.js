@@ -56,6 +56,14 @@ const blogSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'RescueTeam',
         default: null
+    },
+    donationCurrent: {
+        type: Number,
+        default: 0
+    },
+    donationTarget: {
+        type: Number,
+        required: true
     }
 });
 

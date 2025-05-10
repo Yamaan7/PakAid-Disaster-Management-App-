@@ -127,7 +127,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50">
+    <nav className="fixed top-0 w-full z-[1000] bg-white shadow-md">
       {/* Main navbar with shine effects */}
       <div className="relative bg-gradient-to-r from-slate-900 via-gray-800 to-slate-900 shadow-lg">
         {/* Circular shine effects */}
@@ -141,28 +141,31 @@ const Navbar = () => {
           <div className="flex justify-between items-center py-4">
             {/* Logo section with glass effect */}
             <div className="flex items-center relative z-10">
-              <Link href="/home">
-                <a className="text-2xl font-bold flex items-center group">
-                  <div className="p-2 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg">
-                    <HandHelping className="text-red-500" size={24} />
-                  </div>
-                  <span className="ml-2 bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent">
-                    PakAid
-                  </span>
-                </a>
+              <Link
+                href="/home"
+                className="text-2xl font-bold flex items-center group"
+              >
+                <div className="p-2 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg">
+                  <HandHelping className="text-red-500" size={24} />
+                </div>
+                <span className="ml-2 bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent">
+                  PakAid
+                </span>
               </Link>
             </div>
 
             {/* Navigation links with glass effect */}
             <div className="hidden md:flex space-x-8 items-center relative z-10">
               {navLinks.map((link) => (
-                <Link key={link.path} href={link.path}>
-                  <a className={`px-4 py-2 rounded-md transition-colors duration-200
-                    ${location === link.path
+                <Link
+                  key={link.path}
+                  href={link.path}
+                  className={`px-4 py-2 rounded-md transition-colors duration-200
+            ${location === link.path
                       ? 'text-white bg-white/5 backdrop-blur-sm border border-white/10'
-                      : 'text-gray-300'}`}>
-                    {link.title}
-                  </a>
+                      : 'text-gray-300'}`}
+                >
+                  {link.title}
                 </Link>
               ))}
               <div className="pl-4 border-l border-white/10">
@@ -189,16 +192,16 @@ const Navbar = () => {
         <div className="md:hidden border-t border-white/10">
           <div className="bg-slate-900/95 backdrop-blur-sm">
             {navLinks.map((link) => (
-              <Link key={link.path} href={link.path}>
-                <a
-                  className={`block px-4 py-3 transition-colors duration-200
-                    ${location === link.path
-                      ? 'text-white bg-white/5'
-                      : 'text-gray-300'}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.title}
-                </a>
+              <Link
+                key={link.path}
+                href={link.path}
+                className={`block px-4 py-3 transition-colors duration-200
+      ${location === link.path
+                    ? 'text-white bg-white/5'
+                    : 'text-gray-300'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.title}
               </Link>
             ))}
             <div className="p-4 border-t border-white/10">

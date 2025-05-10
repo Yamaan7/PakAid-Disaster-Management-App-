@@ -227,3 +227,39 @@ export const assignTeamToBlog = async (req, res) => {
         });
     }
 };
+
+export const updateDonation = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { amount } = req.body;
+
+        const blog = await Blog.findById(id);
+        if (!blog) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blog not found'
+            });
+        }
+
+        // Update donation amount
+        const updatedBlog = await Blog.findByIdAndUpdate(
+            id,
+            {
+                $inc: { donationCurrent: amount }
+            },
+            { new: true }
+        );
+
+        res.status(200).json({
+            success: true,
+            data: updatedBlog
+        });
+    } catch (error) {
+        console.error('Donation update error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating donation',
+            error: error.message
+        });
+    }
+};
