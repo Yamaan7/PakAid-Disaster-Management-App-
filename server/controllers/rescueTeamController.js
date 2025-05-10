@@ -48,16 +48,36 @@ export const registerRescueTeam = async (req, res) => {
     }
 };
 
+// export const getAllRescueTeams = async (req, res) => {
+//     try {
+//         const teams = await RescueTeam.find()
+//             .select('teamName email teamSize description');
+
+//         res.status(200).json({
+//             success: true,
+//             data: teams
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: 'Failed to fetch rescue teams',
+//             error: error.message
+//         });
+//     }
+// };
+
 export const getAllRescueTeams = async (req, res) => {
     try {
         const teams = await RescueTeam.find()
-            .select('teamName email teamSize description');
+            .select('teamName email teamSize description assignedBlogId assignedBlogTitle')
+            .populate('assignedBlogId', 'title'); // Populate blog details if needed
 
         res.status(200).json({
             success: true,
             data: teams
         });
     } catch (error) {
+        console.error('Error fetching rescue teams:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch rescue teams',

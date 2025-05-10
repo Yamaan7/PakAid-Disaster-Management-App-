@@ -23,7 +23,7 @@ export interface UserBlog {
     image: string;
     keywords?: string;
     donationTarget?: number;
-    assignedTeam?: string; // Add this field
+    assignedTeamId?: string;  // Add this field if not already present
 }
 
 export interface RescueTeam {

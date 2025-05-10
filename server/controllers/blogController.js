@@ -1,5 +1,6 @@
 import Blog from '../models/Blog.js';
 import mongoose from 'mongoose';
+import RescueTeam from '../models/RescueTeam.js';
 
 
 export const createBlog = async (req, res) => {
@@ -136,35 +137,92 @@ export const updateBlog = async (req, res) => {
     }
 };
 
+// export const assignTeamToBlog = async (req, res) => {
+//     try {
+//         const { blogId } = req.params;
+//         const { teamId } = req.body;
+
+//         // Update the blog with the assigned team
+//         const updatedBlog = await Blog.findByIdAndUpdate(
+//             blogId,
+//             { assignedTeam: teamId },
+//             { new: true }
+//         ).populate('assignedTeam');
+
+//         if (!updatedBlog) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'Blog not found'
+//             });
+//         }
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Team assigned successfully',
+//             data: updatedBlog
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: 'Failed to assign team',
+//             error: error.message
+//         });
+//     }
+// };
+
 export const assignTeamToBlog = async (req, res) => {
     try {
         const { blogId } = req.params;
         const { teamId } = req.body;
 
-        // Update the blog with the assigned team
-        const updatedBlog = await Blog.findByIdAndUpdate(
-            blogId,
-            { assignedTeam: teamId },
-            { new: true }
-        ).populate('assignedTeam');
-
-        if (!updatedBlog) {
+        // Find the blog first to get its title
+        const blog = await Blog.findById(blogId);
+        if (!blog) {
             return res.status(404).json({
                 success: false,
                 message: 'Blog not found'
             });
         }
 
+        // Update the blog with assigned team
+        const updatedBlog = await Blog.findByIdAndUpdate(
+            blogId,
+            { assignedTeamId: teamId },
+            { new: true }
+        );
+
+        // Update the rescue team with assigned blog
+        const updatedTeam = await RescueTeam.findByIdAndUpdate(
+            teamId,
+            {
+                assignedBlogId: blogId,
+                assignedBlogTitle: blog.title
+            },
+            { new: true }
+        );
+
+        if (!updatedBlog || !updatedTeam) {
+            return res.status(404).json({
+                success: false,
+                message: 'Failed to update assignment'
+            });
+        }
+
         res.status(200).json({
             success: true,
-            message: 'Team assigned successfully',
-            data: updatedBlog
+            data: {
+                blog: updatedBlog,
+                team: updatedTeam
+            },
+            message: 'Team assigned successfully'
         });
 
     } catch (error) {
+        console.error('Assignment error:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to assign team',
+            message: 'Error assigning team',
             error: error.message
         });
     }

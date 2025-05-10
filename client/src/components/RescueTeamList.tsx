@@ -8,6 +8,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import Swal from 'sweetalert2';
+import { UserBlog } from '@/types/blog';
 
 interface RescueTeam {
     _id: string;
@@ -15,34 +16,58 @@ interface RescueTeam {
     email: string;
     teamSize: number;
     description: string;
+    assignedBlogId?: string;
+    assignedBlogTitle?: string;
 }
 
-interface Blog {
-    _id: string;
-    title: string;
-    location: string;
-    severity: string;
+// interface Blog {
+//     _id: string;
+//     title: string;
+//     location: string;
+//     severity: string;
+//     assignedTeamId?: string;
+// }
+
+interface RescueTeamListProps {
+    blogs: UserBlog[];
+    setBlogs: React.Dispatch<React.SetStateAction<UserBlog[]>>;
 }
 
-export const RescueTeamList = ({ blogs }: { blogs: Blog[] }) => {
+
+export const RescueTeamList = ({ blogs, setBlogs }: RescueTeamListProps) => {
     const [rescueTeams, setRescueTeams] = useState<RescueTeam[]>([]);
     const [selectedTeam, setSelectedTeam] = useState<RescueTeam | null>(null);
     const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
 
     useEffect(() => {
         fetchRescueTeams();
-    }, []);
+    }, [blogs]); // Add blogs as a dependency to refetch when assignments change
 
     const fetchRescueTeams = async () => {
         try {
             const response = await fetch('http://localhost:8080/api/auth/rescue-team');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch rescue teams');
+            }
+
             const data = await response.json();
 
             if (data.success) {
+                // Log the data to verify assignments are present
+                console.log('Fetched rescue teams:', data.data);
+
                 setRescueTeams(data.data);
+            } else {
+                throw new Error(data.message || 'Failed to fetch rescue teams');
             }
         } catch (error) {
             console.error('Error fetching rescue teams:', error);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load rescue teams. Please try again later.',
+            });
         }
     };
 
@@ -63,10 +88,24 @@ export const RescueTeamList = ({ blogs }: { blogs: Blog[] }) => {
                 }),
             });
 
+            if (!response.ok) {
+                throw new Error('Failed to assign team');
+            }
+
             const data = await response.json();
 
             if (data.success) {
-                Swal.fire({
+                // Update local state for rescue teams using the server response
+                setRescueTeams(prev => prev.map(team =>
+                    team._id === data.data.team._id ? data.data.team : team
+                ));
+
+                // Update local state for blogs using the server response
+                setBlogs(prev => prev.map(blog =>
+                    blog._id === data.data.blog._id ? data.data.blog : blog
+                ));
+
+                await Swal.fire({
                     icon: 'success',
                     title: 'Team Assigned Successfully',
                     text: `${selectedTeam?.teamName} has been assigned to the disaster.`,
@@ -75,7 +114,7 @@ export const RescueTeamList = ({ blogs }: { blogs: Blog[] }) => {
             }
         } catch (error) {
             console.error('Error assigning team:', error);
-            Swal.fire({
+            await Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: 'Failed to assign team to disaster.',
@@ -106,13 +145,35 @@ export const RescueTeamList = ({ blogs }: { blogs: Blog[] }) => {
                                 <p className="text-xs text-gray-500 mt-1">
                                     ✉️ Contact: {team.email}
                                 </p>
+                                {team.assignedBlogId && team.assignedBlogTitle && (
+                                    <div className="flex items-center mt-2 text-green-600 text-sm">
+                                        <svg
+                                            className="w-5 h-5 mr-1"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M5 13l4 4L19 7"
+                                            />
+                                        </svg>
+                                        Assigned to: {team.assignedBlogTitle}
+                                    </div>
+                                )}
                             </div>
                             <Button
                                 variant="outline"
                                 onClick={() => handleAssign(team)}
-                                className="bg-blue-50 hover:bg-blue-100"
+                                className={`${team.assignedBlogId
+                                    ? 'bg-gray-100 cursor-not-allowed'
+                                    : 'bg-blue-50 hover:bg-blue-100'
+                                    }`}
+                                disabled={!!team.assignedBlogId}
                             >
-                                Assign to Disaster
+                                {team.assignedBlogId ? 'Already Assigned' : 'Assign to Disaster'}
                             </Button>
                         </div>
                     ))}
@@ -125,18 +186,25 @@ export const RescueTeamList = ({ blogs }: { blogs: Blog[] }) => {
                         <DialogTitle>Assign {selectedTeam?.teamName} to Disaster</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
-                        {blogs.map((blog) => (
-                            <div
-                                key={blog._id}
-                                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-                                onClick={() => assignTeamToBlog(blog._id)}
-                            >
-                                <h4 className="font-medium text-gray-900">{blog.title}</h4>
-                                <p className="text-sm text-gray-600">
-                                    📍 {blog.location} | ⚠️ {blog.severity}
-                                </p>
-                            </div>
-                        ))}
+                        {blogs
+                            .filter(blog => !blog.assignedTeamId)
+                            .map((blog) => (
+                                <div
+                                    key={blog._id}
+                                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                                    onClick={() => assignTeamToBlog(blog._id)}
+                                >
+                                    <h4 className="font-medium text-gray-900">{blog.title}</h4>
+                                    <p className="text-sm text-gray-600">
+                                        📍 {blog.location} | ⚠️ {blog.severity}
+                                    </p>
+                                </div>
+                            ))}
+                        {blogs.filter(blog => !blog.assignedTeamId).length === 0 && (
+                            <p className="text-center text-gray-500 py-4">
+                                No available disasters to assign
+                            </p>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

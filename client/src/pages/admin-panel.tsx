@@ -19,7 +19,7 @@ import { RescueTeamList } from '@/components/RescueTeamList';
 
 const AdminPanel = () => {
   const { user } = useAuth();
-  const [blogs, setBlogs] = useState<UserBlog[]>([]); // Instead of userBlogs
+  const [blogs, setBlogs] = useState<UserBlog[]>([]);
   const [editingBlog, setEditingBlog] = useState<UserBlog | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [blogData, setBlogData] = useState<BlogData>({
@@ -434,7 +434,10 @@ const AdminPanel = () => {
           onSubmit={handleSubmit}
         />
 
-        <RescueTeamList blogs={blogs} />
+        <RescueTeamList
+          blogs={blogs}
+          setBlogs={setBlogs}
+        />
 
       </div>
     </div>
