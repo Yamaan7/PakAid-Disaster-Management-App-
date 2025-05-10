@@ -14,6 +14,32 @@ const BlogDetail = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
 
+  const { data: blog, isLoading, error } = useQuery({
+    queryKey: ['blog', id],
+    queryFn: async () => {
+      const response = await fetch(`http://localhost:8080/api/blogs/${id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch blog');
+      }
+      const data = await response.json();
+      return data.data;
+    },
+  });
+
+  const { data: rescueTeam } = useQuery({
+    queryKey: ['rescueTeam', blog?.assignedTeamId],
+    queryFn: async () => {
+      if (!blog?.assignedTeamId) return null;
+      const response = await fetch(`http://localhost:8080/api/auth/rescue-team/${blog.assignedTeamId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch rescue team');
+      }
+      const data = await response.json();
+      return data.data;
+    },
+    enabled: !!blog?.assignedTeamId
+  });
+
   // Add donation mutation
   const { mutate: updateDonation } = useMutation({
     mutationFn: async (amount: number) => {
@@ -56,17 +82,7 @@ const BlogDetail = () => {
   };
 
 
-  const { data: blog, isLoading, error } = useQuery({
-    queryKey: ['blog', id],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:8080/api/blogs/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch blog');
-      }
-      const data = await response.json();
-      return data.data;
-    },
-  });
+
 
   if (isLoading) {
     return (
@@ -154,8 +170,58 @@ const BlogDetail = () => {
                 </div>
               </div>
             )}
+
+
+            {/* Rescue Team Section */}
+            {blog.assignedTeamId && (
+              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+                <h2 className="text-xl font-bold mb-4">Assigned Rescue Team</h2>
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <img
+                      src={`http://localhost:8080/${rescueTeam?.profilePicturePath}`}
+                      alt={rescueTeam?.teamName}
+                      className="w-24 h-24 rounded-lg object-cover"
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {rescueTeam?.teamName}
+                    </h3>
+                    <div className="mt-2 space-y-2 text-sm text-gray-600">
+                      <p className="flex items-center">
+                        <span className="mr-2">👥</span>
+                        Team Size: {rescueTeam?.teamSize} members
+                      </p>
+                      <p className="flex items-center">
+                        <span className="mr-2">📧</span>
+                        Contact: {rescueTeam?.email}
+                      </p>
+                      <p className="flex items-center">
+                        <span className="mr-2">📱</span>
+                        Phone: {rescueTeam?.phone}
+                      </p>
+                    </div>
+                    <p className="mt-3 text-gray-700">
+                      {rescueTeam?.description}
+                    </p>
+                    <div className="mt-4">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <span className="mr-1.5">✓</span>
+                        Actively Deployed
+                      </span>
+                      <span className="ml-2 text-sm text-gray-500">
+                        Since {new Date(rescueTeam?.deployedDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+
 
         {/* Back Button */}
         <div className="mt-8">

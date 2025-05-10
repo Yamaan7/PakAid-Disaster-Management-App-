@@ -1,4 +1,5 @@
 import RescueTeam from '../models/RescueTeam.js';
+import mongoose from 'mongoose';
 
 export const registerRescueTeam = async (req, res) => {
     try {
@@ -81,6 +82,42 @@ export const getAllRescueTeams = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch rescue teams',
+            error: error.message
+        });
+    }
+};
+
+export const getRescueTeamById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate if id is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid rescue team ID format'
+            });
+        }
+
+        const team = await RescueTeam.findById(id)
+            .select('teamName email phone teamSize description deployedDate profilePicturePath assignedBlogId');
+
+        if (!team) {
+            return res.status(404).json({
+                success: false,
+                message: 'Rescue team not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: team
+        });
+    } catch (error) {
+        console.error('Error fetching rescue team:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch rescue team',
             error: error.message
         });
     }
