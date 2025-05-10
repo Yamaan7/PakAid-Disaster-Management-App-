@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerRescueTeam } from '../controllers/rescueTeamController.js';
+import { registerRescueTeam, getAllRescueTeams } from '../controllers/rescueTeamController.js';
 import upload from '../middleware/upload.js';
 
 const router = express.Router();
@@ -11,5 +11,6 @@ router.post('/register',
     ]),
     registerRescueTeam
 );
+router.get('/', getAllRescueTeams);
 
 export default router;

@@ -23,4 +23,13 @@ export interface UserBlog {
     image: string;
     keywords?: string;
     donationTarget?: number;
+    assignedTeam?: string; // Add this field
+}
+
+export interface RescueTeam {
+    _id: string;
+    teamName: string;
+    email: string;
+    teamSize: number;
+    description: string;
 }

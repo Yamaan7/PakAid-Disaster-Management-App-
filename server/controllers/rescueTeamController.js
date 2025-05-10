@@ -47,3 +47,21 @@ export const registerRescueTeam = async (req, res) => {
         });
     }
 };
+
+export const getAllRescueTeams = async (req, res) => {
+    try {
+        const teams = await RescueTeam.find()
+            .select('teamName email teamSize description');
+
+        res.status(200).json({
+            success: true,
+            data: teams
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch rescue teams',
+            error: error.message
+        });
+    }
+};

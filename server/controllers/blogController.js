@@ -135,3 +135,37 @@ export const updateBlog = async (req, res) => {
         });
     }
 };
+
+export const assignTeamToBlog = async (req, res) => {
+    try {
+        const { blogId } = req.params;
+        const { teamId } = req.body;
+
+        // Update the blog with the assigned team
+        const updatedBlog = await Blog.findByIdAndUpdate(
+            blogId,
+            { assignedTeam: teamId },
+            { new: true }
+        ).populate('assignedTeam');
+
+        if (!updatedBlog) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blog not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Team assigned successfully',
+            data: updatedBlog
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to assign team',
+            error: error.message
+        });
+    }
+};

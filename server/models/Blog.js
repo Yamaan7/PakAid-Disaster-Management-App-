@@ -46,6 +46,11 @@ const blogSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    assignedTeam: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RescueTeam',
+        default: null
     }
 });
 

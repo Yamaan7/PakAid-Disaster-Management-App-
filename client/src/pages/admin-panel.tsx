@@ -15,6 +15,7 @@ import {
 import Swal from 'sweetalert2';
 import { EditBlogDialog } from '@/components/EditBlogDialog';
 import { BlogData, UserBlog } from '@/types/blog';
+import { RescueTeamList } from '@/components/RescueTeamList';
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -432,6 +433,8 @@ const AdminPanel = () => {
           onBlogDataChange={setBlogData}  // This is now correctly typed
           onSubmit={handleSubmit}
         />
+
+        <RescueTeamList blogs={blogs} />
 
       </div>
     </div>
