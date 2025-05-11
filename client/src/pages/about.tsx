@@ -7,24 +7,24 @@ const About = () => {
     <div className="container mx-auto pt-24 px-4 pb-12">
       <div className="pt-4">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold font-heading text-neutral-dark mb-4">About PakAid</h1>
+          <h1 className="text-4xl font-bold font-heading text-neutral-dark mb-4">About Disaster Management</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Connecting communities, rescue teams, and donors to provide effective disaster relief across Pakistan.
           </p>
         </div>
-        
+
         <Card className="mb-12">
           <CardContent className="p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <h2 className="text-2xl font-bold font-heading text-neutral-dark mb-4">Our Mission</h2>
                 <p className="text-gray-700 mb-4">
-                  PakAid was established with a vision to revolutionize the way Pakistan responds to natural disasters.
+                  Disaster Management was established with a vision to revolutionize the way Pakistan responds to natural disasters.
                   Our mission is to create a transparent, efficient, and coordinated disaster management system that connects
                   those in need with those who can help.
                 </p>
                 <p className="text-gray-700 mb-4">
-                  We believe that by leveraging technology and community participation, we can minimize the impact of disasters 
+                  We believe that by leveraging technology and community participation, we can minimize the impact of disasters
                   and save more lives. Our platform brings together government agencies, NGOs, rescue teams, and individual donors
                   in a unified effort to respond to crises effectively.
                 </p>
@@ -62,11 +62,6 @@ const About = () => {
                 </div>
               </div>
               <div>
-                <img 
-                  src="https://images.unsplash.com/photo-1590228947498-5f58817b3836?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                  alt="Disaster relief volunteers" 
-                  className="w-full h-auto rounded-lg shadow-md mb-6"
-                />
                 <h2 className="text-2xl font-bold font-heading text-neutral-dark mb-4">Impact Statistics</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-neutral-light p-4 rounded-lg text-center">
@@ -90,18 +85,18 @@ const About = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Tabs defaultValue="how-it-works" className="w-full mb-12">
           <TabsList className="w-full grid grid-cols-1 md:grid-cols-3 h-auto">
             <TabsTrigger value="how-it-works">How It Works</TabsTrigger>
             <TabsTrigger value="team">Our Team</TabsTrigger>
             <TabsTrigger value="partners">Partners & Affiliations</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="how-it-works" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-2xl font-bold font-heading text-neutral-dark mb-6 text-center">How PakAid Works</h2>
+                <h2 className="text-2xl font-bold font-heading text-neutral-dark mb-6 text-center">How Disaster Management Works</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
                     <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -134,7 +129,7 @@ const About = () => {
                 <div className="mt-8 p-6 bg-neutral-light rounded-lg">
                   <h3 className="text-xl font-bold mb-4 text-center">For Communities in Need</h3>
                   <p className="text-gray-700 mb-4 text-center">
-                    If you are in a disaster-affected area, here's how PakAid can help:
+                    If you are in a disaster-affected area, here's how Disaster Management can help:
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-start">
@@ -160,7 +155,7 @@ const About = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="team" className="mt-6">
             <Card>
               <CardContent className="p-6">
@@ -203,9 +198,9 @@ const About = () => {
                     }
                   ].map((member, index) => (
                     <div key={index} className="bg-white p-6 rounded-lg border border-gray-200 flex flex-col items-center text-center">
-                      <img 
-                        src={member.image} 
-                        alt={member.name} 
+                      <img
+                        src={member.image}
+                        alt={member.name}
                         className="w-24 h-24 rounded-full object-cover border-4 border-neutral-light mb-4"
                       />
                       <h3 className="text-lg font-bold mb-1">{member.name}</h3>
@@ -216,7 +211,7 @@ const About = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="partners" className="mt-6">
             <Card>
               <CardContent className="p-6">
@@ -225,25 +220,25 @@ const About = () => {
                   We collaborate with government agencies, NGOs, and private organizations to strengthen our disaster response capabilities.
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {["Pakistan Red Crescent", "NDMA Pakistan", "UNICEF Pakistan", "WHO Pakistan", 
+                  {["Pakistan Red Crescent", "NDMA Pakistan", "UNICEF Pakistan", "WHO Pakistan",
                     "Edhi Foundation", "AKAH Pakistan", "IRC", "USAID"].map((partner, index) => (
-                    <div key={index} className="bg-neutral-light p-4 rounded-lg text-center h-24 flex items-center justify-center">
-                      <span className="font-medium text-neutral-dark">{partner}</span>
-                    </div>
-                  ))}
+                      <div key={index} className="bg-neutral-light p-4 rounded-lg text-center h-24 flex items-center justify-center">
+                        <span className="font-medium text-neutral-dark">{partner}</span>
+                      </div>
+                    ))}
                 </div>
                 <div className="mt-8 p-6 bg-primary/5 rounded-lg">
                   <h3 className="text-xl font-bold mb-4 text-center">Become a Partner</h3>
                   <p className="text-gray-700 mb-4 text-center">
                     We're always looking for organizations that share our mission to join forces with us.
-                    If you're interested in partnering with PakAid, please contact us at partners@pakaid.org.
+                    If you're interested in partnering with Disaster Management, please contact us at partners@disastermanagement.org.
                   </p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-        
+
         <div className="bg-neutral-light p-8 rounded-lg text-center">
           <h2 className="text-2xl font-bold font-heading text-neutral-dark mb-4">Get Involved</h2>
           <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
@@ -251,22 +246,22 @@ const About = () => {
             there are many ways to contribute to our mission.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            <a 
-              href="/login" 
+            <a
+              href="/login"
               className="bg-primary hover:bg-red-600 text-white font-medium py-3 px-4 rounded-md transition flex flex-col items-center"
             >
               <HandHeart className="mb-2" size={24} />
               <span>Donate</span>
             </a>
-            <a 
-              href="/signup" 
+            <a
+              href="/signup"
               className="bg-secondary hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md transition flex flex-col items-center"
             >
               <Users className="mb-2" size={24} />
               <span>Volunteer</span>
             </a>
-            <a 
-              href="/signup" 
+            <a
+              href="/signup"
               className="bg-accent hover:bg-yellow-600 text-white font-medium py-3 px-4 rounded-md transition flex flex-col items-center"
             >
               <ShieldAlert className="mb-2" size={24} />

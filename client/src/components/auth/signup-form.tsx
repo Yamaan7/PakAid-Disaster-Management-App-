@@ -76,7 +76,7 @@ const SignupForm = () => {
       await Swal.fire({
         icon: 'success',
         title: 'Registration Successful',
-        text: 'Welcome to PakAid!',
+        text: 'Welcome to Disaster Management!',
         confirmButtonColor: '#16a34a',
         timer: 2000,
         showConfirmButton: false
@@ -100,7 +100,7 @@ const SignupForm = () => {
       <CardContent className="pt-6">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold font-heading text-neutral-dark">Create Account</h2>
-          <p className="text-gray-600">Join PakAid today</p>
+          <p className="text-gray-600">Join Disaster Management today</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

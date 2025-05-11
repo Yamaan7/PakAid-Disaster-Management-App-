@@ -149,7 +149,7 @@ const Navbar = () => {
                   <HandHelping className="text-red-500" size={24} />
                 </div>
                 <span className="ml-2 bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent">
-                  PakAid
+                  Disaster Management
                 </span>
               </Link>
             </div>

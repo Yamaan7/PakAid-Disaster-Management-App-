@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { calculateProgress, formatCurrency } from "@/lib/utils";
+import { DisasterSlider } from "@/components/DisasterSlider";
 
 interface Blog {
   _id: string;
@@ -40,6 +41,10 @@ const Home = () => {
 
   return (
     <div className="container mx-auto pt-24 px-4 pb-12">
+
+      {/* Disaster Slider */}
+      <DisasterSlider blogs={blogs} />
+
       <h1 className="text-3xl font-bold mb-8 text-center md:text-left">Latest Disasters</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

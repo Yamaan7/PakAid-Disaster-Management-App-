@@ -79,8 +79,11 @@ export function EditBlogDialog({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {[
-                                        "karachi", "lahore", "islamabad", "rawalpindi", "peshawar",
-                                        // ... rest of the cities
+                                        "karachi", "lahore", "islamabad", "rawalpindi", "peshawar", "quetta", "multan", "faisalabad",
+                                        "hyderabad", "sialkot", "gujranwala", "bahawalpur", "sargodha", "sukkur", "larkana",
+                                        "sheikhupura", "bhimber", "mirpur", "muzaffarabad", "gilgit", "skardu", "hunza", "khuzdar",
+                                        "turbat", "gwadar", "abbottabad", "mansehra", "swat", "mardan", "jacobabad", "kashmore",
+                                        "thatta", "rahim-yar-khan", "sahiwal", "okara",
                                     ].map((city) => (
                                         <SelectItem key={city} value={city}>
                                             {city.charAt(0).toUpperCase() + city.slice(1)}

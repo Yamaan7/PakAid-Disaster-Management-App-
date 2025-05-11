@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Facebook, Twitter, Instagram, Linkedin, Shield, Heart, HandHelping, MapPin, Phone, Mail, AlertTriangle } from "lucide-react";
-import AIRescueChat from "./AiRescueChat";
 
 const Footer = () => {
   return (
@@ -25,7 +24,7 @@ const Footer = () => {
             <div className="p-6 rounded-lg bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/30">
               <h3 className="text-xl font-bold mb-4 font-heading flex items-center text-red-500">
                 <Shield className="mr-2" size={24} />
-                PakAid
+                Disaster Management
               </h3>
               <p className="text-sm text-gray-300 mb-6 leading-relaxed">
                 Your trusted partner in disaster management and emergency response across Pakistan.
@@ -121,7 +120,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center group">
                 <Mail className="mr-3 text-red-500 group-hover:animate-bounce" size={18} />
-                <span className="text-gray-400">info@pakaid.org</span>
+                <span className="text-gray-400">info@disastermanagement.org</span>
               </li>
             </ul>
             <Button
@@ -137,14 +136,12 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className="mt-12 pt-6 border-t border-slate-800 text-sm text-gray-500 text-center relative">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50" />
-          <p>&copy; {new Date().getFullYear()} PakAid. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Disaster Management. All rights reserved.</p>
         </div>
       </div>
 
 
-      <div>
-        <AIRescueChat />
-      </div>
+
     </footer>
   );
 };

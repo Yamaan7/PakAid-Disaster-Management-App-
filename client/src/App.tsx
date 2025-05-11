@@ -45,6 +45,7 @@ function Router() {
             <Route path="/map" component={DisasterMap} />
             <Route path="/admin" component={AdminPanel} />
             <Route path="/rescue-dashboard" component={RescueDashboard} />
+            <Route path="/rescue-team-dashboard" component={RescueDashboard} />
             <Route path="/dashboard" component={userdashboard} />
             <Route path="/about" component={About} />
             <Route path="/login" component={Login} />

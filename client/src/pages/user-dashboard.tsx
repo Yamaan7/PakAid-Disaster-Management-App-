@@ -1,389 +1,14 @@
-import { useState, useEffect } from 'react';
+
 import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import Swal from 'sweetalert2';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 
-interface BlogData {
-    image: string;
-    severity: string;
-    title: string;
-    date: string;
-    keywords: string;
-    content: string;
-    donationTarget: string;
-    location: string;
-    id?: string;  // Make id optional but don't include it in string index signature
-    [key: string]: string | undefined;  // Update index signature to allow undefined
-}
+import AIRescueChat from '@/components/AiRescueChat';
 
-interface UserBlog {
-    _id: string;
-    title: string;
-    content: string;
-    severity: string;
-    location: string;
-    authorName: string;
-    createdAt: string;
-    image: string;
-}
+
 
 
 const UserDashboard = () => {
     const { user } = useAuth();
-    const [userBlogs, setUserBlogs] = useState<UserBlog[]>([]);
-    const [editingBlog, setEditingBlog] = useState<UserBlog | null>(null);
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [blogData, setBlogData] = useState<BlogData>({
-        image: '',
-        severity: '',
-        title: '',
-        date: new Date().toISOString().split('T')[0],
-        keywords: '',
-        content: '',
-        donationTarget: '',
-        location: ''
-    });
-
-    useEffect(() => {
-        const fetchUserBlogs = async () => {
-            try {
-                if (!user?.name) return;
-
-                const response = await fetch(`http://localhost:8080/api/blogs/user/${encodeURIComponent(user.name)}`);
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch blogs');
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    setUserBlogs(data.data);
-                } else {
-                    console.error('Error fetching blogs:', data.error);
-                }
-            } catch (error) {
-                console.error('Error fetching user blogs:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to load your blogs. Please try again later.',
-                    confirmButtonColor: '#3B82F6'
-                });
-            }
-        };
-
-        fetchUserBlogs();
-    }, [user?.name]);
-
-    const handleDelete = async (blogId: string) => {
-        try {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3B82F6',
-                cancelButtonColor: '#EF4444',
-                confirmButtonText: 'Yes, delete it!'
-            });
-
-            if (result.isConfirmed) {
-                const response = await fetch(`http://localhost:8080/api/blogs/${blogId}`, {
-                    method: 'DELETE',
-                });
-
-                if (response.ok) {
-                    setUserBlogs(prev => prev.filter(blog => blog._id !== blogId));
-                    Swal.fire('Deleted!', 'Your blog has been deleted.', 'success');
-                }
-            }
-        } catch (error) {
-            Swal.fire('Error', 'Failed to delete blog', 'error');
-        }
-    };
-
-    const handleEdit = (blog: UserBlog) => {
-        setEditingBlog(blog);
-        setBlogData({
-            id: blog._id,
-            title: blog.title,
-            content: blog.content,
-            severity: blog.severity,
-            location: blog.location,
-            image: blog.image,
-            date: new Date(blog.createdAt).toISOString().split('T')[0],
-            keywords: '',
-            donationTarget: ''
-        });
-        setIsEditDialogOpen(true);
-    };
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const userData = JSON.parse(localStorage.getItem('user') || '{}');
-            const formData = new FormData();
-            const imageFile = (document.getElementById('image') as HTMLInputElement)?.files?.[0];
-
-            if (!imageFile && !editingBlog) {
-                throw new Error('Please select an image');
-            }
-
-            if (imageFile) {
-                formData.append('image', imageFile);
-            }
-
-            // Append blog data
-            // In the handleSubmit function, update the form data appending logic:
-            Object.keys(blogData).forEach((key) => {
-                if (key !== 'image' || imageFile) {
-                    const value = blogData[key];
-                    if (value !== undefined) {  // Add null check
-                        formData.append(key, value);
-                    }
-                }
-            });
-
-            formData.append('authorName', userData.name);
-
-            const url = editingBlog
-                ? `http://localhost:8080/api/blogs/${editingBlog._id}`
-                : 'http://localhost:8080/api/blogs';
-
-            const method = editingBlog ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                body: formData
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-
-                // Update local state
-                if (editingBlog) {
-                    setUserBlogs(prev => prev.map(blog =>
-                        blog._id === editingBlog._id ? data.data : blog
-                    ));
-                    setEditingBlog(null);
-                    setIsEditDialogOpen(false); // Close dialog after successful edit
-                } else {
-                    setUserBlogs(prev => [...prev, data.data]);
-                }
-
-                // Show success message
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Blog Posted Successfully!',
-                    text: 'Your blog has been published.',
-                    confirmButtonColor: '#3B82F6'
-                });
-
-                // Reset all form fields
-                setBlogData({
-                    image: '',
-                    severity: '',
-                    title: '',
-                    date: new Date().toISOString().split('T')[0],
-                    keywords: '',
-                    content: '',
-                    donationTarget: '',
-                    location: ''
-                });
-
-                // Reset file input
-                const fileInput = document.getElementById('image') as HTMLInputElement;
-                if (fileInput) fileInput.value = '';
-
-                // Reset Select components by forcing them to show placeholders
-                const severitySelect = document.querySelector('[id^="radix-"]') as HTMLElement;
-                const locationSelect = document.querySelector('[id^="radix-"]') as HTMLElement;
-                if (severitySelect) severitySelect.click();
-                if (locationSelect) locationSelect.click();
-
-                // Reset text inputs and textarea
-                const titleInput = document.getElementById('title') as HTMLInputElement;
-                const keywordsInput = document.getElementById('keywords') as HTMLInputElement;
-                const contentInput = document.getElementById('content') as HTMLTextAreaElement;
-                const donationInput = document.getElementById('donationTarget') as HTMLInputElement;
-
-                if (titleInput) titleInput.value = '';
-                if (keywordsInput) keywordsInput.value = '';
-                if (contentInput) contentInput.value = '';
-                if (donationInput) donationInput.value = '';
-            }
-
-        } catch (error) {
-            console.error('Error creating blog:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error instanceof Error ? error.message : 'Failed to create blog post. Please try again.',
-                confirmButtonColor: '#3B82F6'
-            });
-        }
-    };
-
-    // Add EditDialog component inside UserDashboard
-    const EditDialog = () => (
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto my-4">
-                <DialogHeader className="sticky top-0 bg-white pb-4 z-10">
-                    <DialogTitle>Edit Blog Post</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4"> {/* Reduced space-y-6 to space-y-4 */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Grid layout for compact form */}
-                        <div>
-                            <Label htmlFor="title">📝 Title</Label>
-                            <Input
-                                id="title"
-                                value={blogData.title}
-                                placeholder="Enter blog title"
-                                onChange={(e) => setBlogData({ ...blogData, title: e.target.value })}
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="date">📅 Date</Label>
-                            <Input
-                                id="date"
-                                type="date"
-                                value={blogData.date}
-                                onChange={(e) => setBlogData({ ...blogData, date: e.target.value })}
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="severity">⚠️ Severity Level</Label>
-                            <Select
-                                value={blogData.severity}
-                                onValueChange={(value) => setBlogData({ ...blogData, severity: value })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select severity" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="urgent">🚨 Urgent</SelectItem>
-                                    <SelectItem value="ongoing">🌀 Ongoing</SelectItem>
-                                    <SelectItem value="basic">ℹ️ Basic</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div>
-                            <Label htmlFor="location">📍 Location</Label>
-                            <Select
-                                value={blogData.location}
-                                onValueChange={(value) => setBlogData({ ...blogData, location: value })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select city" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {[
-                                        "karachi", "lahore", "islamabad", "rawalpindi", "peshawar",
-                                        "quetta", "multan", "faisalabad", "hyderabad", "sialkot",
-                                        "gujranwala", "bahawalpur", "sargodha", "sukkur", "larkana",
-                                        "sheikhupura", "bhimber", "mirpur", "muzaffarabad", "gilgit",
-                                        "skardu", "hunza", "khuzdar", "turbat", "gwadar", "abbottabad",
-                                        "mansehra", "swat", "mardan", "jacobabad", "kashmore",
-                                        "thatta", "rahim-yar-khan", "sahiwal", "okara"
-                                    ].map((city) => (
-                                        <SelectItem key={city} value={city}>
-                                            {city.charAt(0).toUpperCase() + city.slice(1)}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="image">🖼️ Disaster Image</Label>
-                        <Input
-                            id="image"
-                            type="file"
-                            accept="image/*"
-                            className="file:mr-4 file:px-4 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-sm hover:file:bg-indigo-100 transition-all duration-200"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    setBlogData({ ...blogData, image: file.name });
-                                }
-                            }}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="keywords">🔍 Keywords</Label>
-                            <Input
-                                id="keywords"
-                                value={blogData.keywords}
-                                placeholder="e.g., balochistan, earthquake"
-                                onChange={(e) => setBlogData({ ...blogData, keywords: e.target.value })}
-                            />
-                        </div>
-
-                        <div>
-                            <Label htmlFor="donationTarget">🎯 Donation Target (PKR)</Label>
-                            <Input
-                                id="donationTarget"
-                                type="number"
-                                value={blogData.donationTarget}
-                                placeholder="Enter target amount"
-                                onChange={(e) => setBlogData({ ...blogData, donationTarget: e.target.value })}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="content">✏️ Blog Content</Label>
-                        <Textarea
-                            id="content"
-                            value={blogData.content}
-                            placeholder="Write your blog content here..."
-                            className="h-24"
-                            onChange={(e) => setBlogData({ ...blogData, content: e.target.value })}
-                        />
-                    </div>
-
-                    <div className="flex justify-end space-x-2 pt-4 sticky bottom-0 bg-white">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setIsEditDialogOpen(false)}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                        >
-                            Save Changes
-                        </Button>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
@@ -415,178 +40,115 @@ const UserDashboard = () => {
                         </p>
                     </CardContent>
                 </Card>
+                <div className="mb-8 rounded-2xl shadow-xl border border-gray-200 bg-white overflow-hidden">
+                    {/* Header Section */}
+                    <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-6 rounded-t-2xl">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h2 className="text-2xl font-bold tracking-wide">
+                                    🤖 AI Emergency Assistant
+                                </h2>
+                                <p className="text-sm opacity-90 mt-1">
+                                    Get immediate guidance for disaster situations
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
+                    {/* Content Section */}
+                    {/* Main Content Section */}
+                    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        {/* Section Header */}
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+                                Emergency Assistance at Your Fingertips
+                            </h2>
+                            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                                Our AI assistant provides immediate guidance for emergency situations including floods, earthquakes, heatwaves, and landslides.
+                            </p>
+                        </div>
 
-                {/* User's Blogs Section */}
-                <Card className="mb-8 rounded-2xl shadow-xl border border-gray-200 bg-gradient-to-br from-white via-gray-50 to-gray-100">
-                    <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6 rounded-t-2xl">
-                        <h2 className="text-2xl font-bold tracking-wide">📝 Your Blogs</h2>
-                        <p className="text-sm text-white/90 mt-1">Manage your published blogs</p>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                        {userBlogs.length === 0 ? (
-                            <p className="text-gray-500 text-center py-4 italic">You haven't published any blogs yet.</p>
-                        ) : (
-                            <div className="space-y-4">
-                                {userBlogs.map((blog) => (
-                                    <div
-                                        key={blog._id}
-                                        className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-shadow duration-300 flex justify-between items-start"
-                                    >
-                                        <div>
-                                            <h3 className="font-semibold text-lg text-gray-800">{blog.title}</h3>
-                                            <p className="text-sm text-gray-600">
-                                                📍 Location: {blog.location} &nbsp;|&nbsp; ⚠️ Severity: {blog.severity}
-                                            </p>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                🗓️ Posted on: {new Date(blog.createdAt).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                        <div className="space-x-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="hover:bg-indigo-100 transition-colors"
-                                                onClick={() => handleEdit(blog)}
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => handleDelete(blog._id)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
+                        {/* Two-column layout for larger screens */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                            {/* Information Panel */}
+                            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-red-100 p-2 rounded-full">
+                                        <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                                    <h3 className="text-xl font-semibold text-gray-900">When to Use This Assistant</h3>
+                                </div>
+                                <ul className="space-y-3 text-gray-600">
+                                    <li className="flex items-start gap-2">
+                                        <svg className="flex-shrink-0 w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        <span>For non-life-threatening emergency guidance</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <svg className="flex-shrink-0 w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        <span>To get step-by-step instructions for emergencies</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <svg className="flex-shrink-0 w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        <span>For information about disaster preparedness</span>
+                                    </li>
+                                </ul>
 
-
-                {/* Blog Creation Form */}
-                <Card className="rounded-2xl shadow-xl border border-gray-200 bg-gradient-to-b from-white via-gray-50 to-gray-100 mb-12">
-                    <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-500 text-white p-6 rounded-t-2xl">
-                        <h2 className="text-2xl font-bold">📣 Create a Blog Post</h2>
-                        <p className="text-sm mt-1 text-white/90">Share details about a disaster needing urgent attention</p>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
-                                <Label htmlFor="image">🖼️ Disaster Image</Label>
-                                <Input
-                                    id="image"
-                                    type="file"
-                                    accept="image/*"
-                                    className="file:mr-4 file:px-4 file:rounded-md file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-sm hover:file:bg-indigo-100 transition-all duration-200"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            setBlogData({ ...blogData, image: file.name });
-                                        }
-                                    }}
-                                />
-                            </div>
-
-
-                            <div>
-                                <Label htmlFor="severity">⚠️ Severity Level</Label>
-                                <Select onValueChange={(value) => setBlogData({ ...blogData, severity: value })}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select severity" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="urgent">🚨 Urgent</SelectItem>
-                                        <SelectItem value="ongoing">🌀 Ongoing</SelectItem>
-                                        <SelectItem value="basic">ℹ️ Basic</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div>
-                                <Label htmlFor="location">📍 Location</Label>
-                                <Select onValueChange={(value) => setBlogData({ ...blogData, location: value })}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select city" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {/* You can scroll or group these later if needed */}
-                                        {[
-                                            "karachi", "lahore", "islamabad", "rawalpindi", "peshawar", "quetta", "multan", "faisalabad",
-                                            "hyderabad", "sialkot", "gujranwala", "bahawalpur", "sargodha", "sukkur", "larkana",
-                                            "sheikhupura", "bhimber", "mirpur", "muzaffarabad", "gilgit", "skardu", "hunza", "khuzdar",
-                                            "turbat", "gwadar", "abbottabad", "mansehra", "swat", "mardan", "jacobabad", "kashmore",
-                                            "thatta", "rahim-yar-khan", "sahiwal", "okara"
-                                        ].map((city) => (
-                                            <SelectItem key={city} value={city}>{city.charAt(0).toUpperCase() + city.slice(1)}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <div className="mt-8 pt-6 border-t border-gray-200">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="bg-red-100 p-2 rounded-full">
+                                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-xl font-semibold text-gray-900">Immediate Emergency Contacts</h3>
+                                    </div>
+                                    <div className="space-y-2 text-gray-600">
+                                        <p className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-900">Pakistan Emergency:</span> 1122
+                                        </p>
+                                        <p className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-900">NDMA Helpline:</span> 051-111-157-157
+                                        </p>
+                                        <p className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-900">Rescue 15:</span> 15
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <Label htmlFor="title">📝 Title</Label>
-                                <Input
-                                    id="title"
-                                    placeholder="Enter blog title"
-                                    onChange={(e) => setBlogData({ ...blogData, title: e.target.value })}
-                                />
+                            {/* Chat Interface Panel */}
+                            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 h-full">
+                                <div className="text-center mb-6">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                                        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">AI Emergency Assistant</h3>
+                                    <p className="text-gray-600">Chat with our specialized assistant for immediate guidance</p>
+                                </div>
+
+                                <div className="isolate h-[500px]">
+                                    <AIRescueChat />
+                                </div>
+
+                                <div className="mt-4 text-xs text-gray-500 text-center">
+                                    <p>Note: For life-threatening emergencies, please call emergency services immediately.</p>
+                                </div>
                             </div>
+                        </div>
+                    </section>
 
-                            <div>
-                                <Label htmlFor="date">📅 Date</Label>
-                                <Input
-                                    id="date"
-                                    type="date"
-                                    value={blogData.date}
-                                    onChange={(e) => setBlogData({ ...blogData, date: e.target.value })}
-                                />
-                            </div>
 
-                            <div>
-                                <Label htmlFor="keywords">🔍 Keywords</Label>
-                                <Input
-                                    id="keywords"
-                                    placeholder="e.g., balochistan, earthquake, emergency"
-                                    onChange={(e) => setBlogData({ ...blogData, keywords: e.target.value })}
-                                />
-                            </div>
-
-                            <div>
-                                <Label htmlFor="content">✏️ Blog Content</Label>
-                                <Textarea
-                                    id="content"
-                                    placeholder="Write your blog content here..."
-                                    className="h-36"
-                                    onChange={(e) => setBlogData({ ...blogData, content: e.target.value })}
-                                />
-                            </div>
-
-                            <div>
-                                <Label htmlFor="donationTarget">🎯 Donation Target (PKR)</Label>
-                                <Input
-                                    id="donationTarget"
-                                    type="number"
-                                    placeholder="Enter target amount"
-                                    onChange={(e) => setBlogData({ ...blogData, donationTarget: e.target.value })}
-                                />
-                            </div>
-
-                            <Button
-                                type="submit"
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md transition"
-                            >
-                                🚀 Publish Blog
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
-
-                <EditDialog />
-
+                </div>
             </div>
         </div>
     );

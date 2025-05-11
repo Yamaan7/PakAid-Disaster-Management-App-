@@ -202,9 +202,9 @@ const BlogDetail = () => {
                         Phone: {rescueTeam?.phone}
                       </p>
                     </div>
-                    <p className="mt-3 text-gray-700">
+                    {/* <p className="mt-3 text-gray-700">
                       {rescueTeam?.description}
-                    </p>
+                    </p> */}
                     <div className="mt-4">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                         <span className="mr-1.5">✓</span>

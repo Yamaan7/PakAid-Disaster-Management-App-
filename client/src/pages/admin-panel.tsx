@@ -124,11 +124,9 @@ const AdminPanel = () => {
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       const formData = new FormData();
 
-      // Append the image file if it exists (for both new and edited blogs)
       if (blogData.imageFile) {
-        formData.append('image', blogData.imageFile);
+        formData.append('image', blogData.imageFile);  // Use the actual File object
       } else if (!editingBlog) {
-        // Only require image for new blogs
         throw new Error('Please select an image');
       }
 
@@ -326,7 +324,11 @@ const AdminPanel = () => {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      setBlogData({ ...blogData, image: file.name });
+                      setBlogData(prev => ({
+                        ...prev,
+                        image: file.name,
+                        imageFile: file  // Save the actual file object
+                      }));
                     }
                   }}
                 />
