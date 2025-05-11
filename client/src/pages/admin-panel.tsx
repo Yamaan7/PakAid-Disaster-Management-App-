@@ -344,7 +344,7 @@ const AdminPanel = () => {
                   <SelectContent>
                     <SelectItem value="urgent">🚨 Urgent</SelectItem>
                     <SelectItem value="ongoing">🌀 Ongoing</SelectItem>
-                    <SelectItem value="basic">ℹ️ Basic</SelectItem>
+                    <SelectItem value="past">ℹ️ Past</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

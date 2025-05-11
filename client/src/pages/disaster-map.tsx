@@ -9,7 +9,7 @@ interface Blog {
   _id: string;
   title: string;
   location: string;
-  severity: 'urgent' | 'ongoing' | 'resolved';
+  severity: 'urgent' | 'ongoing' | 'past';
   image: string; // Add this line
 }
 

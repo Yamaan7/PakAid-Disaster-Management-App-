@@ -64,7 +64,7 @@ export function EditBlogDialog({
                                 <SelectContent>
                                     <SelectItem value="urgent">Urgent</SelectItem>
                                     <SelectItem value="ongoing">Ongoing</SelectItem>
-                                    <SelectItem value="basic">Basic</SelectItem>
+                                    <SelectItem value="past">Past</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

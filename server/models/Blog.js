@@ -16,7 +16,7 @@ const blogSchema = new mongoose.Schema({
     },
     severity: {
         type: String,
-        enum: ['urgent', 'ongoing', 'basic'],
+        enum: ['urgent', 'ongoing', 'past'],
         required: true
     },
     location: {
