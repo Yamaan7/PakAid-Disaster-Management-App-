@@ -1,218 +1,127 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
-import { useQuery } from "@tanstack/react-query";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Link } from "wouter";
-import DisasterMarker from "@/components/disaster-marker";
-import { fetchDisasters, Disaster } from "@/data/mock-data";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { cityCoordinates } from "@/data/pakistan-cities";
+import { Icon } from 'leaflet';
+
+interface Blog {
+  _id: string;
+  title: string;
+  location: string;
+  severity: 'urgent' | 'ongoing' | 'resolved';
+  image: string; // Add this line
+}
 
 const DisasterMap = () => {
-  const { data: disasters = [], isLoading } = useQuery({
-    queryKey: ['/api/disasters'],
-    queryFn: fetchDisasters,
+  // Create custom marker icon
+  const customIcon = new Icon({
+    iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
+        <path fill="#ef4444" d="M12 0c-4.4 0-8 3.6-8 8c0 5.4 7 14.5 7.3 14.8c0.2 0.3 0.5 0.4 0.7 0.4s0.5-0.1 0.7-0.4c0.3-0.3 7.3-9.4 7.3-14.8c0-4.4-3.6-8-8-8zm0 12c-2.2 0-4-1.8-4-4s1.8-4 4-4s4 1.8 4 4s-1.8 4-4 4z"/>
+      </svg>
+    `),
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
   });
-  
-  const [filters, setFilters] = useState({
-    types: {
-      floods: true,
-      earthquakes: true,
-      landslides: true,
-      droughts: true,
-      heatwaves: true,
-    },
-    status: {
-      urgent: true,
-      ongoing: true,
-      past: false,
-    },
+  const { data: blogs = [] } = useQuery<Blog[]>({
+    queryKey: ['blogs'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:8080/api/blogs');
+      if (!response.ok) throw new Error('Failed to fetch blogs');
+      const data = await response.json();
+      return data.data;
+    }
   });
-  
-  const handleTypeFilterChange = (type: string) => {
-    setFilters(prev => ({
-      ...prev,
-      types: {
-        ...prev.types,
-        [type]: !prev.types[type as keyof typeof prev.types],
-      },
-    }));
-  };
-  
-  const handleStatusFilterChange = (status: string) => {
-    setFilters(prev => ({
-      ...prev,
-      status: {
-        ...prev.status,
-        [status]: !prev.status[status as keyof typeof prev.status],
-      },
-    }));
-  };
-  
-  const filteredDisasters = disasters.filter(disaster => {
-    const typeMatch = 
-      (disaster.type.toLowerCase() === 'flood' && filters.types.floods) ||
-      (disaster.type.toLowerCase() === 'earthquake' && filters.types.earthquakes) ||
-      (disaster.type.toLowerCase() === 'landslide' && filters.types.landslides) ||
-      (disaster.type.toLowerCase() === 'drought' && filters.types.droughts) ||
-      (disaster.type.toLowerCase() === 'heatwave' && filters.types.heatwaves);
-    
-    const statusMatch = 
-      (disaster.status.toLowerCase() === 'urgent' && filters.status.urgent) ||
-      (disaster.status.toLowerCase() === 'ongoing' && filters.status.ongoing) ||
-      (disaster.status.toLowerCase() === 'past' && filters.status.past);
-    
-    return typeMatch && statusMatch;
-  });
-  
+
   return (
-    <div className="container mx-auto pt-24 px-4 pb-12">
-      <div className="pt-4">
-        <h1 className="text-3xl font-bold font-heading text-neutral-dark mb-4">Disaster Map</h1>
-        <p className="text-gray-600 mb-6">Interactive map showing current disaster locations across Pakistan. Click on any marker for more information.</p>
-        
-        <Card className="p-4">
-          <CardContent className="p-0">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="md:w-3/4">
-                {/* Map Container */}
-                <div className="relative border border-gray-300 rounded-lg overflow-hidden" style={{ height: '600px' }}>
-                  {isLoading ? (
-                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                      <div className="spinner"></div>
-                      <p className="mt-4 text-gray-600">Loading map data...</p>
-                    </div>
-                  ) : (
-                    <MapContainer 
-                      center={[30.3753, 69.3451]} // Center of Pakistan
-                      zoom={5} 
-                      style={{ height: '100%', width: '100%' }}
-                      zoomControl={false}
-                    >
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    <div className="container mx-auto px-4 py-24">
+      <div className="flex gap-6">
+        {/* Map Container */}
+        <div style={{ height: "500px", width: "70%" }} className="border rounded-lg overflow-hidden">
+          <MapContainer
+            center={[30.3753, 69.3451]}
+            zoom={5}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            {/* Add Markers for each blog */}
+            {blogs.map((blog) => {
+              const coordinates = cityCoordinates[blog.location.toLowerCase()];
+              if (!coordinates) return null;
+
+              return (
+                <Marker
+                  key={blog._id}
+                  position={coordinates}
+                  icon={customIcon}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <img
+                        src={`http://localhost:8080/${blog.image}`}
+                        alt={blog.title}
+                        className="w-full h-32 object-cover rounded-lg mb-2"
                       />
-                      <ZoomControl position="bottomright" />
-                      
-                      {filteredDisasters.map(disaster => (
-                        <DisasterMarker key={disaster.id} disaster={disaster} />
-                      ))}
-                    </MapContainer>
-                  )}
-                </div>
-              </div>
-              
-              <div className="md:w-1/4">
-                {/* Filter Controls */}
-                <div className="bg-neutral-light p-4 rounded-lg mb-4">
-                  <h3 className="font-heading font-semibold text-lg mb-3">Filter Disasters</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="filter-floods" 
-                        checked={filters.types.floods}
-                        onCheckedChange={() => handleTypeFilterChange('floods')}
-                      />
-                      <Label htmlFor="filter-floods">Floods</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="filter-earthquakes" 
-                        checked={filters.types.earthquakes}
-                        onCheckedChange={() => handleTypeFilterChange('earthquakes')}
-                      />
-                      <Label htmlFor="filter-earthquakes">Earthquakes</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="filter-landslides" 
-                        checked={filters.types.landslides}
-                        onCheckedChange={() => handleTypeFilterChange('landslides')}
-                      />
-                      <Label htmlFor="filter-landslides">Landslides</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="filter-droughts" 
-                        checked={filters.types.droughts}
-                        onCheckedChange={() => handleTypeFilterChange('droughts')}
-                      />
-                      <Label htmlFor="filter-droughts">Droughts</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="filter-heatwaves" 
-                        checked={filters.types.heatwaves}
-                        onCheckedChange={() => handleTypeFilterChange('heatwaves')}
-                      />
-                      <Label htmlFor="filter-heatwaves">Heatwaves</Label>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <h4 className="font-medium text-sm mb-2">Status</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="filter-urgent" 
-                          checked={filters.status.urgent}
-                          onCheckedChange={() => handleStatusFilterChange('urgent')}
-                        />
-                        <Label htmlFor="filter-urgent" className="text-danger font-medium">Urgent</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="filter-ongoing" 
-                          checked={filters.status.ongoing}
-                          onCheckedChange={() => handleStatusFilterChange('ongoing')}
-                        />
-                        <Label htmlFor="filter-ongoing" className="text-accent font-medium">Ongoing</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="filter-past" 
-                          checked={filters.status.past}
-                          onCheckedChange={() => handleStatusFilterChange('past')}
-                        />
-                        <Label htmlFor="filter-past" className="text-gray-500">Past</Label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Active Disaster List */}
-                <div className="bg-white border border-gray-200 rounded-lg">
-                  <div className="p-4 border-b border-gray-200">
-                    <h3 className="font-heading font-semibold text-lg">Active Disasters</h3>
-                  </div>
-                  <div className="divide-y divide-gray-200 max-h-80 overflow-y-auto">
-                    {filteredDisasters.filter(d => d.status !== 'Past').map((disaster) => (
-                      <Link key={disaster.id} href={`/blog/${disaster.id}`}>
-                        <a className="block p-4 hover:bg-neutral-light transition">
-                          <h4 className="font-medium text-neutral-dark mb-1">{disaster.title}</h4>
-                          <p className="text-sm text-gray-600 mb-1">{disaster.location.region}</p>
-                          <span className={`inline-block text-white text-xs px-2 py-0.5 rounded-full ${
-                            disaster.status === 'Urgent' ? 'bg-danger' : 'bg-accent'
-                          }`}>
-                            {disaster.status}
-                          </span>
-                        </a>
+                      <h3 className="font-bold text-lg">{blog.title}</h3>
+                      <p className="text-sm text-gray-600">{blog.location}</p>
+                      <span className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${blog.severity === 'urgent'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                        {blog.severity}
+                      </span>
+                      <Link href={`/blog/${blog._id}`}>
+                        <a className="block mt-2 text-blue-500 hover:underline">View Details</a>
                       </Link>
-                    ))}
-                    
-                    {filteredDisasters.filter(d => d.status !== 'Past').length === 0 && (
-                      <div className="p-4 text-center text-gray-500">
-                        No active disasters match your filter criteria.
-                      </div>
-                    )}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+          </MapContainer>
+        </div>
+
+        {/* Blogs Side Container */}
+        <div className="w-[30%] border rounded-lg">
+          <div className="p-4 border-b">
+            <h2 className="text-xl font-semibold">Active Disasters</h2>
+          </div>
+          <div className="overflow-y-auto" style={{ height: "440px" }}>
+            {blogs.map((blog: Blog) => (
+              <Link key={blog._id} href={`/blog/${blog._id}`}>
+                <a className="block p-4 border-b hover:bg-gray-50">
+                  <div className="flex gap-4">
+                    {/* Image container */}
+                    <div className="w-24 h-24 flex-shrink-0">
+                      <img
+                        src={`http://localhost:8080/${blog.image}`}
+                        alt={blog.title}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+
+                    {/* Content container */}
+                    <div className="flex-1">
+                      <h3 className="font-medium mb-1">{blog.title}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{blog.location}</p>
+                      <span className={`inline-block px-2 py-0.5 text-xs rounded ${blog.severity === 'urgent'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                        {blog.severity}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                </a>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

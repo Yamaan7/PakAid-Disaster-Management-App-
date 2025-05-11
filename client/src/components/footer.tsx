@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Facebook, Twitter, Instagram, Linkedin, Shield, Heart, HandHelping, MapPin, Phone, Mail, AlertTriangle } from "lucide-react";
+import AIRescueChat from "./AiRescueChat";
 
 const Footer = () => {
   return (
@@ -138,6 +139,11 @@ const Footer = () => {
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50" />
           <p>&copy; {new Date().getFullYear()} PakAid. All rights reserved.</p>
         </div>
+      </div>
+
+
+      <div>
+        <AIRescueChat />
       </div>
     </footer>
   );

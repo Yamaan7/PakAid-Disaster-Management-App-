@@ -7,3 +7,4 @@ vite.config.ts.*
 # Ignore uploads folder for user uploaded content
 uploads/
 server/uploads/
+.env
