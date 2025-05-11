@@ -46,21 +46,41 @@ export const login = async (req, res) => {
         );
 
         // Prepare user data based on type
+        // const userData = isRescueTeam ? {
+        //     id: user._id,
+        //     name: user.teamName,
+        //     email: user.email,
+        //     role: 'rescue-team',
+        //     phone: user.phone,
+        //     description: user.description,
+        //     teamSize: user.teamSize,
+        //     deployedDate: user.deployedDate
+        // } : {
+        //     id: user._id,
+        //     name: user.name,
+        //     email: user.email,
+        //     role: user.role
+        // };
+
         const userData = isRescueTeam ? {
             id: user._id,
-            name: user.teamName,
+            name: user.teamName, // Optional: keep for display name
+            teamName: user.teamName, // ✅ Explicit field for rescue team dashboard
             email: user.email,
             role: 'rescue-team',
             phone: user.phone,
             description: user.description,
             teamSize: user.teamSize,
-            deployedDate: user.deployedDate
+            deployedDate: user.deployedDate,
+            profilePicturePath: user.profilePicturePath, // ✅ add this
+            assignedBlogTitle: user.assignedBlogTitle // ✅ add this
         } : {
             id: user._id,
             name: user.name,
             email: user.email,
             role: user.role
         };
+
 
         res.status(200).json({
             success: true,

@@ -23,13 +23,34 @@ export interface UserBlog {
     image: string;
     keywords?: string;
     donationTarget?: number;
-    assignedTeamId?: string;  // Add this field if not already present
+    donationCurrent?: number;
+    assignedTeamId?: string;
+    assignedTeam?: RescueTeam;
 }
 
 export interface RescueTeam {
     _id: string;
     teamName: string;
     email: string;
+    phone: string;
     teamSize: number;
     description: string;
+    deployedDate: string;
+    profilePicturePath: string;
+    assignedBlogId?: string;
+    role: 'rescue-team';
+}
+
+export type Severity = 'urgent' | 'ongoing' | 'past';
+
+export interface BlogResponse {
+    success: boolean;
+    data: UserBlog[];
+    message?: string;
+}
+
+export interface RescueTeamResponse {
+    success: boolean;
+    data: RescueTeam;
+    message?: string;
 }

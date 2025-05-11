@@ -1,11 +1,16 @@
 
 import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  Mail, Phone, Users, CalendarDays, Info, UserCircle2, Newspaper
+} from 'lucide-react';
 
 import AIRescueChat from '@/components/AiRescueChat';
 
 const RescueDashboard = () => {
   const { user } = useAuth();
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -14,29 +19,71 @@ const RescueDashboard = () => {
 
         <div className="container mx-auto px-4 py-12 text-white">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Welcome to Your Dashboard
+            Welcome to Rescue Team Dashboard
           </h1>
-          <p className="text-lg opacity-90">
+          {/* <p className="text-lg opacity-90">
             Share your insights and help others stay informed
-          </p>
+          </p> */}
         </div>
       </div>
 
       {/* User Info Card */}
       <div className="container mx-auto px-4">
-        <Card className="mb-8 rounded-2xl shadow-xl border border-gray-200 bg-gradient-to-br from-white via-gray-50 to-gray-100">
+        <Card className="mb-8 rounded-2xl shadow-xl border border-gray-200 bg-white">
           <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-6 rounded-t-2xl">
-            <h2 className="text-2xl font-bold tracking-wide">👤 Profile Information</h2>
+            <h2 className="text-2xl font-bold tracking-wide flex items-center gap-2">
+              <UserCircle2 className="w-6 h-6" />
+              Rescue Team Profile
+            </h2>
           </CardHeader>
           <CardContent className="p-6">
-            <p className="text-lg text-gray-700 mb-2">
-              <span className="font-medium text-gray-900">Name:</span> {user?.name}
-            </p>
-            <p className="text-lg text-gray-700">
-              <span className="font-medium text-gray-900">Email:</span> {user?.email}
-            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <Card className="h-32 bg-gradient-to-r from-yellow-100 to-yellow-200 flex flex-col justify-center items-center text-center p-3 shadow-md">
+                <UserCircle2 className="text-yellow-700 w-5 h-5 mb-1.5" />
+                <span className="text-sm text-gray-600">Team Name</span>
+                <span className="font-semibold truncate max-w-[90%]">{user.teamName}</span>
+              </Card>
+
+              <Card className="h-32 bg-gradient-to-r from-blue-100 to-blue-200 flex flex-col justify-center items-center text-center p-3 shadow-md">
+                <Mail className="text-blue-700 w-5 h-5 mb-1.5" />
+                <span className="text-sm text-gray-600">Email</span>
+                <span className="font-semibold truncate max-w-[90%]">{user.email}</span>
+              </Card>
+
+              <Card className="h-32 bg-gradient-to-r from-green-100 to-green-200 flex flex-col justify-center items-center text-center p-3 shadow-md">
+                <Phone className="text-green-700 w-5 h-5 mb-1.5" />
+                <span className="text-sm text-gray-600">Phone</span>
+                <span className="font-semibold">{user.phone}</span>
+              </Card>
+
+              <Card className="h-32 bg-gradient-to-r from-pink-100 to-pink-200 flex flex-col justify-center items-center text-center p-3 shadow-md">
+                <Users className="text-pink-700 w-5 h-5 mb-1.5" />
+                <span className="text-sm text-gray-600">Team Size</span>
+                <span className="font-semibold">{user.teamSize} members</span>
+              </Card>
+
+              <Card className="h-32 bg-gradient-to-r from-purple-100 to-purple-200 flex flex-col justify-center items-center text-center p-3 shadow-md">
+                <CalendarDays className="text-purple-700 w-5 h-5 mb-1.5" />
+                <span className="text-sm text-gray-600">Deployed Date</span>
+                <span className="font-semibold">{new Date(user.deployedDate).toLocaleDateString()}</span>
+              </Card>
+
+              <Card className="h-32 bg-gradient-to-r from-teal-100 to-teal-200 flex flex-col justify-center items-center text-center p-3 shadow-md">
+                <Info className="text-teal-700 w-5 h-5 mb-1.5" />
+                <span className="text-sm text-gray-600">Description</span>
+                <span className="font-semibold truncate max-w-[90%]">{user.description}</span>
+              </Card>
+
+              <Card className="h-32 bg-gradient-to-r from-red-100 to-red-200 flex flex-col justify-center items-center text-center p-3 shadow-md">
+                <Newspaper className="text-red-700 w-5 h-5 mb-1.5" />
+                <span className="text-sm text-gray-600">Assigned Blog</span>
+                <span className="font-semibold">{user.assignedBlogTitle || 'None'}</span>
+              </Card>
+            </div>
           </CardContent>
         </Card>
+
+
         <div className="mb-8 rounded-2xl shadow-xl border border-gray-200 bg-white overflow-hidden">
           {/* Header Section */}
           <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-6 rounded-t-2xl">
